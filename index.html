@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script>
+
+    let todoState = [];
+    let oldTodoState = [];
+
+    function markDone(id){
+      const element=document.getElementById(id);
+      const button=element.children[2];
+      button.innerText="Done";
+
+    }
+
+    function addTodoToDom(todo) {                               //By ReactDom,ReactNative
+      const container=document.getElementById("todos");
+
+      const element=document.createElement("div");
+      element.setAttribute("id",todo.id);
+
+      const title=document.createElement("div");
+      title.innerText=todo.title;
+
+      const description=document.createElement("div");
+      description.innerText=todo.description;
+
+      const button=document.createElement("button");
+      button.setAttribute("onClick",`markDone(${todo.id})`);
+      button.innerText = "Mark Done";
+
+
+      element.appendChild(title);
+      element.appendChild(description);
+      element.appendChild(button);
+
+      container.appendChild(element);
+    }
+
+    function removeTodoFromDom(todo) {                      //By ReactDom,ReactNative
+      const element=document.getElementById(todo.id);
+      element.parentNode.removeChild(element);
+      
+    }
+
+    function updateTodoInDom(oldTodo, newTodo) {             //By ReactDom,ReactNative
+      const element=document.getElementById(newTodo.id);
+      element.children[0].innerText=newTodo.title;
+      element.children[1].innerText=newTodo.description;
+    }
+
+    function newChange(oldTodo,newTodo){                  
+      if((oldTodo.title!=newTodo.title)||(oldTodo.description!=newTodo.description)){
+        return true;
+      }
+      return false;
+    }
+
+    function updateState(newTodos) {           //task delegated to react
+
+      // calculate the diff b/w newTodos and oldTodos.
+      // More specifically, find out what todos are - 
+      // 1. added
+      // 2. deleted
+      // 3. updated
+      const added = [];
+      const deleted = [];
+      const updated = [];
+
+      newTodos.forEach((todo) => {
+        const oldTodo=oldTodoState.find((oldTodo)=>{
+          return oldTodo.id==todo.id;
+        })
+          if(!oldTodo){
+            added.push(todo);
+          }
+          else if(newChange(oldTodo,todo)){
+            updated.push(todo);
+          }
+      });
+
+      oldTodoState.forEach((oldTodo)=>{
+        const newtodo=newTodos.find((newTodo)=>{
+          return newTodo.id==oldTodo.id;
+        })
+        if(!newtodo){
+          deleted.push(oldTodo);
+        }
+      })
+
+      // calculate these 3 arrays
+      // call addTodo, removeTodo, updateTodo functions on each of the
+      // elements
+
+      added.forEach((added)=>{
+        addTodoToDom(added);
+      })
+      deleted.forEach((deleted)=>{
+        removeTodoFromDom(deleted);
+      })
+      updated.forEach((updated)=>{
+        updateTodoInDom(updated,updated)
+      })
+
+      
+      oldTodoState = [...newTodos];
+    }
+
+    function addTodo() {                         //done by us developers
+
+      const id = document.getElementById("id").value;
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+
+
+      todoState.push({
+        title: title,
+        description: description,
+        id: id
+      })
+
+      console.log(oldTodoState);
+      console.log(todoState);
+      console.log(" ");
+
+
+      updateState(todoState);
+
+      console.log(oldTodoState);
+      console.log(todoState);
+      console.log(" ");
+
+      setTimeout(()=>{     //to simulate the delete operation
+      todoState=[]
+      },20000);
+
+    }
+    
+
+  </script>
+</head>
+
+<body>
+  <input type="text" id="id" placeholder="Todo id"></input> <br /><br />
+  <input type="text" id="title" placeholder="Todo title"></input> <br /><br />
+  <input type="text" id="description" placeholder="Todo description"></input> <br /><br />
+  <button onclick="addTodo()">Add todo</button>
+  <br /> <br />
+
+  <div id="todos">
+
+  </div>
+</body>
+
+</html>
